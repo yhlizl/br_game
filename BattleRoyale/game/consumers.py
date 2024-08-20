@@ -21,6 +21,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         logging.info(f'Player connected: {self.channel_name}')
         logging.info(f'Current number of players: {len(self.game["players"])}')
         logging.info(f'Player data: {self.game["players"]}')
+        print("Joined group game")
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -61,24 +62,29 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.handle_attack(self.channel_name, text_data_json['target'])
         elif action == 'defend':
             self.handle_defend(self.channel_name)
+        elif action == "get_info":
+            print(self.game)
 
         # Send new game state to WebSocket
         await self.send(text_data=json.dumps(self.game))
     # Receive message from game group
     async def game_message(self, event):
         message = event['text']
-
-        if message == "Server started":
+        print("Message received:", message)
+        if message["action"] == "Server started":
             self.game['state'] = 'running'
-        elif message == "Game started":
+        elif message["action"] == "Game started":
             self.game['state'] = 'game'
-        elif message == "Practice mode started":
+        elif message["action"] == "Practice mode started":
             self.game['state'] = 'practice'
-        elif message == "Practice mode stopped":
+        elif message["action"] == "Practice mode stopped":
             self.game['state'] = 'running'
-        elif message == "Game reset":
+        elif message["action"] == "Game reset":
             self.game['state'] = 'waiting'
             self.game['players'] = {}
+        elif message["action"] == "get_info":
+
+            print(self.game)
 
         # Send new game state to WebSocket
         await self.send(text_data=json.dumps(self.game))
