@@ -3,6 +3,7 @@ import json
 from threading import Timer
 from .characters import Character  # Import your Character class
 import random
+import logging
 
 class GameConsumer(AsyncWebsocketConsumer):
     game = {
@@ -17,7 +18,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             "game",
             self.channel_name
         )
-
+        logging.info(f'Player connected: {self.channel_name}')
+        logging.info(f'Current number of players: {len(self.game["players"])}')
+        logging.info(f'Player data: {self.game["players"]}')
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -26,7 +29,9 @@ class GameConsumer(AsyncWebsocketConsumer):
             "game",
             self.channel_name
         )
-
+        logging.info(f'Player disconnected: {self.channel_name}')
+        logging.info(f'Current number of players: {len(self.game["players"])}')
+        logging.info(f'Player data: {self.game["players"]}')
         # Remove player from game
         if self.channel_name in self.game['players']:
             del self.game['players'][self.channel_name]

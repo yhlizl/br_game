@@ -2,7 +2,7 @@
 import argparse
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
+import json
 class GameServer:
     def __init__(self):
         self.game_state = "stopped"
@@ -11,12 +11,15 @@ class GameServer:
     def start(self):
         self.game_state = "running"
         print("Server started")
-        self.send_message("Server started")
+        self.send_message(json.dumps({"action": "Server started"}))
+    
+    def get_info(self):
+        self.send_message(json.dumps({"action": "get_info"}))
 
     def start_game(self):
         if self.game_state == "running":
             print("Game started")
-            self.send_message("Game started")
+            self.send_message(json.dumps({"action": "Game started"}))
         else:
             print("Server is not running")
 
@@ -24,17 +27,17 @@ class GameServer:
         if self.game_state == "running":
             if practice:
                 print("Practice mode started")
-                self.send_message("Practice mode started")
+                self.send_message(json.dumps({"action": "Practice mode started"}))
             else:
                 print("Practice mode stopped")
-                self.send_message("Practice mode stopped")
+                self.send_message(json.dumps({"action": "Practice mode stopped"}))
         else:
             print("Server is not running")
 
     def reset(self):
         self.game_state = "stopped"
         print("Game reset")
-        self.send_message("Game reset")
+        self.send_message(json.dumps({"action": "Game reset"}))
 
     def send_message(self, message):
         async_to_sync(self.channel_layer.group_send)("game", {
